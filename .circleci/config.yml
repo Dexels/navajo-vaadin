@@ -1,0 +1,58 @@
+version: 2
+jobs:
+  build:
+    branch:
+      only:
+        newbuild
+    docker:
+      - image: circleci/openjdk:8-jdk
+    working_directory: ~/repo
+    environment:
+      JVM_OPTS: -Xmx1000m
+      TERM: dumb
+    steps:
+      - checkout
+      - run: |
+          BASE_CONTAINER_BUILD=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
+          MINORTAG=3.3
+          TAG=${MINORTAG}.$BASE_CONTAINER_BUILD
+          echo "Tag for parent: ${TAG}"
+          rm -rf plugins *.zip
+          mkdir plugins
+          BRANCH=newmaven
+          NAVAJO_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/navajo?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
+          echo "Navajo Version: $NAVAJO_VERSION"
+          curl -s "https://${NAVAJO_VERSION}-4423334-gh.circle-artifacts.com/0/vaadin_p2.zip?circle-token=$CIRCLE_TOKEN&branch=${BRANCH}" -o vaadin_p2.zip
+          ls *.zip | xargs -I '{}' unzip -o '{}'
+          rm -rf artifacts.* content.* features* *.index
+          rm *.zip
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - .
+  package_navajo:
+    machine:
+      image: circleci/classic:edge
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run: |
+          docker --version
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - run: |
+          TAG=${MINORTAG}.$CIRCLE_BUILD_NUM
+          BASE_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
+          echo "Building tag: $TAG"
+          cd ~/repo
+          ls -l
+          docker build --build-arg TAG=${MINORTAG}.${BASE_VERSION} -t dexels/navajo-vaadin:$TAG -t dexels/navajo-vaadin:latest .
+          docker push dexels/navajo-vaadin:$TAG
+          docker push dexels/navajo-vaadin:latest
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - package_navajo:
+          requires:
+            - build
+      - build

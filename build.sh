@@ -1,5 +1,5 @@
 #!/bin/sh
-BASE_CONTAINER_BUILD=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
+BASE_CONTAINER_BUILD=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/navajo-vaadin?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
 MINORTAG=3.3
 TAG=${MINORTAG}.$BASE_CONTAINER_BUILD
 echo "Tag for parent: ${TAG}"

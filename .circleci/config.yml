@@ -1,9 +1,6 @@
 version: 2
 jobs:
   build:
-    branch:
-      only:
-        newbuild
     docker:
       - image: circleci/openjdk:8-jdk
     working_directory: ~/repo
@@ -48,6 +45,9 @@ jobs:
           docker build --build-arg TAG=${MINORTAG}.${BASE_VERSION} -t dexels/navajo-vaadin:$TAG -t dexels/navajo-vaadin:latest .
           docker push dexels/navajo-vaadin:$TAG
           docker push dexels/navajo-vaadin:latest
+      - run: |
+          curl -X POST --header "Content-Type: application/json" -d '{"branch":"master"}' "https://circleci.com/api/v1.1/project/github/dexels/com.sportlink.oao/build?circle-token=${CIRCLE_TOKEN}"
+
 workflows:
   version: 2
   workflow:

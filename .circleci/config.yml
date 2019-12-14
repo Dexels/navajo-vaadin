@@ -17,7 +17,7 @@ jobs:
           rm -rf plugins *.zip
           mkdir plugins
           BRANCH=newmaven
-          NAVAJO_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/navajo?circle-token=${CIRCLE_TOKEN}&limit=100&offset=0&filter=successful" | jq '[.[]| select(.branch == "newmaven")][0].build_num')
+          NAVAJO_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/navajo?circle-token=${CIRCLE_TOKEN}&limit=100&offset=0&filter=successful" | jq '[.[]| select(.branch == "master")][0].build_num')
           echo "Navajo Version: $NAVAJO_VERSION"
           curl -s "https://${NAVAJO_VERSION}-4423334-gh.circle-artifacts.com/0/vaadin_p2.zip?circle-token=$CIRCLE_TOKEN&branch=${BRANCH}" -o vaadin_p2.zip
           ls *.zip | xargs -I '{}' unzip -o '{}'

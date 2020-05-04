@@ -1,0 +1,11 @@
+HTTP/1.1 302 Found
+Date: Mon, 04 May 2020 13:27:16 GMT
+Location: https://circle-production-customer-artifacts.s3.amazonaws.com/picard/5c8b719aecd77c0001f24360/5eaff2f6c1e1ce62fe07f6cc-0-build/artifacts/vaadin_p2.zip?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200504T132716Z&X-Amz-SignedHeaders=host&X-Amz-Expires=60&X-Amz-Credential=AKIAJR3Q6CR467H7Z55A%2F20200504%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=3faacb8507b4180e7037eda899efce268a61652b81022456e4faa5b72f8ad060
+Server: nginx
+Set-Cookie: ring-session=%2B7ItAwt15fRl5PbqageYyQbiRlCr3pOhu3jFvBqOQiw%3D--XM30nefJDN8KE0MbLcDrN3yHjlXnYNQKaBu4QVo09%2Fc%3D;Path=/;HttpOnly;Expires=Tue, 04 May 2021 09:43:50 +0000;Max-Age=31536000;Secure
+X-CircleCI-Identity: artifacts-service-v1-6666757d5c-dtbsz
+X-Rate-Limit-Applied: yes
+X-Rate-Limit-Result: PASSED
+Content-Length: 433
+Connection: keep-alive
+

@@ -16,13 +16,13 @@ jobs:
       - run:
           name: Fetch vaadin P2 environment from CircleCI artifacts
           command: |
-            BASE_CONTAINER_BUILD=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
+            BASE_CONTAINER_BUILD=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=100&offset=0&filter=successful" | jq "[.[]| select(.branch = \"${CIRCLE_BRANCH}\" and .workflows.job_name == \"build\")][0].build_num")
             MINORTAG=3.3
             TAG=${MINORTAG}.$BASE_CONTAINER_BUILD
             echo "Tag for parent: ${TAG}"
             rm -rf plugins *.zip
             mkdir plugins
-            NAVAJO_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/navajo?circle-token=${CIRCLE_TOKEN}&limit=100&offset=0&filter=successful" | jq '[.[]| select(.branch == "master")][0].build_num')
+            NAVAJO_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/navajo?circle-token=${CIRCLE_TOKEN}&limit=100&offset=0&filter=successful" | jq "[.[]| select(.branch == \"${CIRCLE_BRANCH}\")][0].build_num")
             echo "Navajo Version: $NAVAJO_VERSION"
             curl -L -s "https://${NAVAJO_VERSION}-4423334-gh.circle-artifacts.com/0/vaadin_p2.zip?circle-token=$CIRCLE_TOKEN&branch=master" -o vaadin_p2.zip
             ls *.zip | xargs -I '{}' unzip -o '{}'
@@ -42,24 +42,30 @@ jobs:
       - run:
           name: Build and push Docker image
           command: |
-            TAG=${MINORTAG}.$CIRCLE_BUILD_NUM
+            TAGSUFFIX=`[[ $CIRCLE_BRANCH = "master" ]] && echo "" || echo "-$CIRCLE_BRANCH"`
+            TAG=${MINORTAG}.${CIRCLE_BUILD_NUM}{TAGSUFFIX}
             BASE_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
-            echo "Building tag: $TAG"
+            IMAGE=dexels/navajo-vaadin
+            DEXELS_BASE_TAG=${MINORTAG}.${BASE_VERSION}${TAGSUFFIX}
+            echo "Building ${IMAGE}${TAG} from dexels/dexels-base:${DEXELS_BASE_TAG}"
             cd ~/repo
             ls -l
-            docker build --build-arg TAG=${MINORTAG}.${BASE_VERSION} -t dexels/navajo-vaadin:$TAG -t dexels/navajo-vaadin:latest .
-            docker push dexels/navajo-vaadin:$TAG
-            docker push dexels/navajo-vaadin:latest
-
+            docker build --build-arg TAG=${DEXELS_BASE_TAG} -t ${IMAGE}:$TAG .
+            docker push ${IMAGE}:$TAG
+            if [ $CIRCLE_BRANCH = "master" ]; then
+               docker tag ${IMAGE}:$TAG ${IMAGE}:latest
+               docker push ${IMAGE}:latest
+            fi
       - run:
           name: Trigger com.sportlink.oao build
           command: |
-            curl -X POST \
-              --header "Content-Type: application/json" \
-              --header "Circle-Token: ${CIRCLE_TOKEN}" \
-              -d '{"branch":"master"}' \
-              "https://circleci.com/api/v1.1/project/github/dexels/com.sportlink.oao/build"
-
+            if [ "$CIRCLE_BRANCH" = "master" ]; then
+              curl -X POST \
+                --header "Content-Type: application/json" \
+                --header "Circle-Token: ${CIRCLE_TOKEN}" \
+                -d "{\"branch\":\"${CIRCLE_BRANCH}\"}" \
+                "https://circleci.com/api/v1.1/project/github/dexels/com.sportlink.oao/build"
+            fi
 workflows:
   version: 2
   workflow:
@@ -67,3 +73,8 @@ workflows:
       - build:
           context:
           - dexels_docker_hub
+          filters:
+            branches:
+              only:
+                - master
+                - test

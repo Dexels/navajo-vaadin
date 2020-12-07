@@ -43,7 +43,7 @@ jobs:
           name: Build and push Docker image
           command: |
             TAGSUFFIX=`[[ $CIRCLE_BRANCH = "master" ]] && echo "" || echo "-$CIRCLE_BRANCH"`
-            TAG=${MINORTAG}.${CIRCLE_BUILD_NUM}{TAGSUFFIX}
+            TAG=${MINORTAG}.${CIRCLE_BUILD_NUM}${TAGSUFFIX}
             BASE_VERSION=$(curl -s "https://circleci.com/api/v1.1/project/github/Dexels/dexels-base?circle-token=${CIRCLE_TOKEN}&limit=1&offset=0&filter=successful" | jq '.[0].build_num')
             IMAGE=dexels/navajo-vaadin
             DEXELS_BASE_TAG=${MINORTAG}.${BASE_VERSION}${TAGSUFFIX}

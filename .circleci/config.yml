@@ -31,7 +31,7 @@ jobs:
             ARTIFACT_URL=$( curl -X GET \
               --header "Content-Type: application/json" \
               --header "Circle-Token: ${CIRCLE_TOKEN}" \
-              "https://circleci.com/api/v1.1/project/github/dexels/tipi/${TIPI_VERSION)/artifacts" | jq -r "map(.url)[0]" )
+              "https://circleci.com/api/v1.1/project/github/dexels/tipi/${TIPI_VERSION}/artifacts" | jq -r "map(.url)[0]" )
             curl -L -s \
                --header "Circle-Token: ${CIRCLE_TOKEN}" \
                "${ARTIFACT_URL}" -o tipi_vaadin_p2.zip

@@ -34,7 +34,7 @@ jobs:
               "https://circleci.com/api/v1.1/project/github/dexels/tipi/${TIPI_VERSION)/artifacts" | jq "map(.url)[0]" )
             curl -L -s \
                --header "Circle-Token: ${CIRCLE_TOKEN}" \
-               "$ARTIFACT_URL" -o tipi_vaadin_p2.zip
+               ${ARTIFACT_URL} -o tipi_vaadin_p2.zip
             ls *.zip | xargs -I '{}' unzip -o '{}'
             rm -rf artifacts.* content.* features* *.index
             rm *.zip
